@@ -1,11 +1,96 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import { FaCircleChevronLeft, FaCircleChevronRight } from "react-icons/fa6";
+import { AiOutlineClose } from "react-icons/ai";
+import { UserAuth } from "../context/AuthContext";
+import { db } from "../services/firbase";
+import { createImageURL } from "../services/MovieServices";
+import { arrayRemove, doc, onSnapshot, updateDoc } from "firebase/firestore";
 
 const Profile = () => {
+  const [movies, setMovies] = useState([]);
+  const { user } = UserAuth();
+
+  useEffect(() => {
+    if (user) {
+      onSnapshot(doc(db, "user", `${user?.email}`), (doc) => {
+        if (doc.data()) {
+          setMovies(doc.data().favShows);
+        }
+      });
+    }
+  }, [user?.email]);
+
+  const slide = (offset) => {
+    const slider = document.getElementById("slider");
+    slider.scrollLeft += offset;
+  };
+
+  const handleUnlikeShow=async (movie)=>{
+    const userDoc=doc(db,'user',user.email);
+    await updateDoc(userDoc,{
+      favShows:arrayRemove(movie)
+    })
+  }
+
   return (
     <div>
-      Profile
+      <div>
+        <img
+          className="block w-full h-[500px] object-cover"
+          src="https://assets.nflxext.com/ffe/siteui/vlv3/c31c3123-3df7-4359-8b8c-475bd2d9925d/15feb590-3d73-45e9-9e4a-2eb334c83921/IN-en-20231225-popsignuptwoweeks-perspective_alpha_website_large.jpg"
+          alt="///"
+        />
+
+        <div className="bg-black/70 fixed top-0 left-0 w-full h-[500px]" />
+
+        <div className="absolute w-full top-[20%] lg:top-[25%] p-4 md:p-8 font-nsans-bold text-3xl">
+          Myy Shows
+        </div>
+
+        <>
+          <h2 className="font-nsans-bold md:text-xl p-4">Liked Show</h2>
+          <div className="relative flex items-center group">
+            <FaCircleChevronLeft
+              onClick={() => slide(-500)}
+              className="absolute left-2 opacity-80 text-gray-700 z-10 hidden group-hover:block cursor-pointer"
+              size={40}
+            />
+            <div
+              id={`slider`}
+              className="w-full h-full overflow-x-scroll whitespace-nowrap scroll-smooth scrollbar-hide"
+            >
+              {movies.map((movie) => (
+                <div
+                  key={movie.id}
+                  className="relative w-[160px] sm:w-[200px] md:w-[240px] lg:w-[280px] inline-block rounded-lg overflow-hidden cursor-pointer m-2"
+                >
+                  <img
+                    className="w-full h-[170px] block object-cover object-top"
+                    src={createImageURL(movie.backdrop_path ?? movie.poster_path, "w500")}
+                    alt={movie.title}
+                  />
+
+                  <div className="absolute top-0 left-0 w-full h-[170px] bg-black/80 opacity-0 hover:opacity-100">
+                    <p className="whitespace-normal text-xs md:text-sm flex justify-center items-center h-full font-nsans-bold">
+                      {movie.title}
+                    </p>
+                    <p>
+                      <AiOutlineClose size={30} onClick={()=>handleUnlikeShow(movie)} className="absolute top-2 right-2"/>
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <FaCircleChevronRight
+              onClick={() => slide(500)}
+              className="absolute right-2 opacity-80 text-gray-700 z-10 hidden group-hover:block cursor-pointer"
+              size={40}
+            />
+          </div>
+        </>
+      </div>
     </div>
-  )
-}
+  );
+};
 
 export default Profile;
