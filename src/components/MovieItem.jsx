@@ -27,7 +27,7 @@ const MovieItem = ({ movie }) => {
   }
 
   return (
-    <div className="relative w-[160px] sm:w-[200px] md:w-[240px] lg:w-[280px] inline-block rounded-lg overflow-hidden cursor-pointer m-2">
+    <div className="relative w-[160px] sm:w-[200px] md:w-[240px] lg:w-[280px] inline-block rounded-lg overflow-hidden cursor-pointer m-2 hover:scale-110">
       <img
         className="w-full h-[170px] block object-cover object-top"
         src={createImageURL(backdrop_path ?? poster_path, "w500")}
